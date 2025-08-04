@@ -17,13 +17,15 @@ const LoginPage = () => {
     try {
       const userProfile = await signIn({ email, password });
 
-      // --- LÓGICA DE REDIRECIONAMENTO ATUALIZADA ---
+      // --- LÓGICA DE REDIRECIONAMENTO CORRIGIDA ---
       if (userProfile.role === 'superadmin') {
-        navigate('/superadmin'); // Redireciona para o painel do SuperAdmin
+        navigate('/superadmin');
+      } else if (userProfile.role === 'csm') { // ✅ CORREÇÃO AQUI
+        navigate('/csm'); // Redireciona para o painel do CSM
       } else if (userProfile.role === 'coordinator') {
-        navigate('/coordinator'); // Redireciona para o painel do coordenador
+        navigate('/coordinator');
       } else {
-        navigate('/'); // Redireciona para o dashboard padrão
+        navigate('/'); // Redireciona para o dashboard padrão de funcionários
       }
 
     } catch (err: any) {
@@ -67,7 +69,7 @@ const LoginPage = () => {
               disabled={loading}
               className="w-full px-4 py-2 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-blue-300"
             >
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? 'A entrar...' : 'Entrar'}
             </button>
           </div>
         </form>

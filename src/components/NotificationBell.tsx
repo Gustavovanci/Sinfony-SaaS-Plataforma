@@ -1,8 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getNotificationsForUser, markNotificationsAsRead } from '../services/notificationService';
+import { 
+  getNotificationsForUser, 
+  markNotificationsAsReadForUser, 
+  deleteNotificationForUser 
+} from '../services/notificationService';
 import type { Notification } from '../services/notificationService';
-import { Bell, X } from 'lucide-react';
+import { Bell, X, Trash2 } from 'lucide-react';
 
 const NotificationBell = () => {
   const { userProfile } = useAuth();
@@ -11,16 +15,8 @@ const NotificationBell = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // --- CORREÇÃO AQUI ---
-    // Só busca notificações se o usuário tiver um organizationId (ou seja, não é um superadmin).
-    if (!userProfile || !userProfile.organizationId) {
-      return;
-    }
-
-    const unsubscribe = getNotificationsForUser(userProfile, (fetchedNotifications) => {
-      setNotifications(fetchedNotifications);
-    });
-
+    if (!userProfile) return;
+    const unsubscribe = getNotificationsForUser(userProfile, setNotifications);
     return () => unsubscribe();
   }, [userProfile]);
 
@@ -37,15 +33,26 @@ const NotificationBell = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleOpenNotifications = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen && unreadCount > 0) {
+    const newIsOpen = !isOpen;
+    setIsOpen(newIsOpen);
+    if (newIsOpen && unreadCount > 0 && userProfile) {
       const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
-      markNotificationsAsRead(unreadIds);
+      markNotificationsAsReadForUser(userProfile.uid, unreadIds);
     }
   };
+  
+  const handleDelete = async (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation();
+    if (!userProfile) return;
+    
+    // Otimização: remove da lista local imediatamente para feedback visual
+    setNotifications(prev => prev.filter(n => n.id !== notificationId));
+    
+    // Chama o serviço para apagar no backend
+    await deleteNotificationForUser(userProfile.uid, notificationId);
+  };
 
-  // Se o usuário for superadmin, não renderiza o sino.
-  if (userProfile?.role === 'superadmin') {
+  if (userProfile?.role === 'superadmin' || userProfile?.role === 'csm') {
     return null;
   }
 
@@ -70,15 +77,24 @@ const NotificationBell = () => {
           <div className="max-h-96 overflow-y-auto">
             {notifications.length > 0 ? (
               notifications.map(notif => (
-                <div key={notif.id} className={`p-4 border-b hover:bg-gray-50 ${!notif.read ? 'bg-blue-50' : ''}`}>
-                  <p className="text-sm text-gray-700">{notif.message}</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {notif.createdAt.toLocaleDateString('pt-BR')} às {notif.createdAt.toLocaleTimeString('pt-BR')}
-                  </p>
+                <div key={notif.id} className={`group p-4 border-b flex justify-between items-start gap-2 hover:bg-gray-50 ${!notif.read ? 'bg-blue-50' : ''}`}>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-700">{notif.message}</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {notif.createdAt.toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={(e) => handleDelete(e, notif.id)} 
+                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
+                    title="Apagar notificação"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               ))
             ) : (
-              <p className="p-4 text-sm text-gray-500">Nenhuma notificação nova.</p>
+              <p className="p-4 text-sm text-gray-500">Nenhuma notificação.</p>
             )}
           </div>
         </div>

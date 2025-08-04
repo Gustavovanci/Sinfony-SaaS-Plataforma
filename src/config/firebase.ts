@@ -3,13 +3,14 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
+// Lê as variáveis de ambiente em vez de as ter diretamente no código
 const firebaseConfig = {
-  apiKey: "AIzaSyDzTmMtHmDAY2QddkdKdZBDxOJAToxD4GQ",
-  authDomain: "carenet-saas.firebaseapp.com",
-  projectId: "carenet-saas",
-  storageBucket: "carenet-saas.firebasestorage.app",
-  messagingSenderId: "659603756725",
-  appId: "1:659603756725:web:299abad36746a79f1550fc"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Inicializa o Firebase

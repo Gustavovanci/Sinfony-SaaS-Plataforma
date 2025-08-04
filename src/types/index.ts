@@ -15,9 +15,10 @@ export interface UserProfile {
   email: string;
   displayName: string | null;
   organizationId?: string;
-  role: 'employee' | 'coordinator' | 'superadmin';
+  role: 'employee' | 'coordinator' | 'superadmin' | 'csm';
+  status: 'active' | 'inactive';
   profession?: string;
-  sector?: string; // <-- NOVO CAMPO
+  sector?: string;
   profileCompleted: boolean;
   gamification: {
     points: number;
@@ -34,12 +35,6 @@ export interface SignUpData extends SignInData {
   displayName: string;
 }
 
-
-// src/types/index.ts
-
-// ... (mantenha os tipos que já existem)
-
-// Adicione estes novos tipos no final do arquivo
 export interface CSMHospital {
     id: string;
     name: string;
@@ -58,6 +53,7 @@ export interface ModuleTemplate {
     isActive: boolean;
     estimatedDuration: number;
     uploadedAt: Date;
+    createdBy: string;
 }
 
 export interface SystemLog {
@@ -88,4 +84,42 @@ export interface SystemHealth {
         functions: 'healthy' | 'degraded' | 'down';
         hosting: 'healthy' | 'degraded' | 'down';
     };
+}
+
+// ✅ NOVOS TIPOS PARA CRIAÇÃO DE MÓDULOS E QUIZZES
+
+export interface QuestionData {
+  questionText: string;
+  options: string[];
+  correctAnswerIndex: number;
+}
+
+export interface QuizData {
+  title: string;
+  moduleId: string;
+  questions: QuestionData[];
+}
+
+export interface ModuleTopic {
+  id: string;
+  title: string;
+  type: 'video' | 'text' | 'image' | 'quiz';
+  content?: string;
+  videoUrl?: string;
+  imageUrl?: string;
+  quizId?: string;
+  quizData?: { // Usado apenas durante a criação
+    questions: QuestionData[];
+  };
+}
+
+export interface NewModuleData {
+  title: string;
+  description: string;
+  category: string;
+  estimatedDuration: number;
+  coverImageUrl: string;
+  isActive: boolean;
+  createdBy: string;
+  topics: ModuleTopic[];
 }

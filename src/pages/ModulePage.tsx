@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getModuleById } from '../services/moduleService';
@@ -12,7 +12,7 @@ import QuizComponent from '../components/QuizComponent';
 import FeedbackModal from '../components/FeedbackModal';
 import { submitFeedback } from '../services/feedbackService';
 
-// Componente interno para renderizar o conteúdo do tópico
+// Componente interno para renderizar o conteúdo do tópico (sem alterações)
 const TopicContent = ({ topic, onComplete }: { topic: Topic; onComplete: (score?: number) => void }) => {
   switch (topic.type) {
     case 'video':
@@ -45,35 +45,38 @@ const ModulePage = () => {
   const [showCertificateButton, setShowCertificateButton] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!moduleId || !user) return;
+  // ✅ SOLUÇÃO: A dependência [activeTopic] foi removida do useCallback para quebrar o loop.
+  const fetchData = useCallback(async () => {
+    if (!moduleId || !user) return;
+    
+    try {
+      // Não definimos loading aqui para evitar piscar o ecrã em recarregamentos
+      const [moduleData, progressData] = await Promise.all([
+        getModuleById(moduleId),
+        getProgressForModule(user.uid, moduleId),
+      ]);
+
+      setModule(moduleData);
+      setProgress(progressData);
       
-      try {
-        const [moduleData, progressData] = await Promise.all([
-          getModuleById(moduleId),
-          getProgressForModule(user.uid, moduleId),
-        ]);
-
-        setModule(moduleData);
-        setProgress(progressData);
-
-        if (moduleData?.topics?.length && !activeTopic) {
-          setActiveTopic(moduleData.topics[0]);
-        }
-        
-        if (progressData?.status === 'completed') {
-          setShowCertificateButton(true);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar dados do módulo:", error);
-      } finally {
-        setLoading(false);
+      // Define o tópico ativo apenas se ele ainda não tiver sido definido
+      if (moduleData?.topics?.length && !activeTopic) {
+        setActiveTopic(moduleData.topics[0]);
       }
-    };
+      
+      if (progressData?.status === 'completed') {
+        setShowCertificateButton(true);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados do módulo:", error);
+    } finally {
+      setLoading(false); // Garante que o loading para no final
+    }
+  }, [moduleId, user]); // A função só será recriada se o ID do módulo ou o utilizador mudar.
 
+  useEffect(() => {
     fetchData();
-  }, [moduleId, user]);
+  }, [fetchData]);
 
   const handleMarkAsCompleted = async (score?: number) => {
     if (!user || !module || !activeTopic) return;
@@ -85,11 +88,11 @@ const ModulePage = () => {
       if (moduleCompleted) {
         setShowFeedbackModal(true);
       }
-    } else {
+    } else if (activeTopic.type !== 'quiz') {
       await markTopicAsCompleted(user.uid, module.id, activeTopic.id);
     }
   
-    await fetchData();
+    await fetchData(); // Recarrega os dados para atualizar a interface (ex: o ícone do tópico)
   };
 
   const handleFeedbackSubmit = async (feedback: { nps: number; csat: number; comment: string }) => {
@@ -120,7 +123,8 @@ const ModulePage = () => {
     return progress?.completedTopics?.includes(topicId) ?? false;
   };
 
-  if (loading) return <div className="flex items-center justify-center h-screen">Carregando módulo...</div>;
+  // Lógica de Renderização
+  if (loading) return <div className="flex items-center justify-center h-screen">A carregar módulo...</div>;
   if (!module) return <div className="flex items-center justify-center h-screen">Módulo não encontrado.</div>;
 
   return (
