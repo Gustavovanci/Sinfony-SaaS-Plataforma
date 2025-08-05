@@ -7,7 +7,7 @@ import {
   sendPasswordResetEmail,
   EmailAuthProvider,
   reauthenticateWithCredential,
-  User
+  type User
 } from 'firebase/auth';
 import { 
   collection, 

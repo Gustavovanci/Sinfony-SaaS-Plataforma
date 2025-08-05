@@ -34,7 +34,8 @@ const EmployeeDetailPage = () => {
         }
 
         setProgress(progressData);
-        setModules(modulesData);
+        // Correção aqui: acesse a propriedade 'modules' do objeto retornado
+        setModules(modulesData.modules);
 
       } catch (error) {
         console.error("Erro ao buscar detalhes do funcionário:", error);

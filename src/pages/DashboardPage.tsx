@@ -188,3 +188,13 @@ const DashboardPage = () => {
               <Trophy className="w-6 h-6 text-purple-600" />
             </div>
           </div>
+          <h3 className="text-sm font-medium text-gray-600 mb-1">Taxa de Conclusão</h3>
+          <p className="text-2xl font-bold text-purple-600">{userStats.completionRate}%</p>
+          <p className="text-sm text-gray-500">dos módulos concluídos</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardPage;

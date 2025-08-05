@@ -21,7 +21,13 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Resolução de Caminhos */
+    "baseUrl": "src",  // Defina o baseUrl como a pasta 'src'
+    "paths": {
+      "@/*": ["*"]  // Mapeie o alias '@' para a pasta 'src'
+    }
   },
   "include": ["src"]
 }

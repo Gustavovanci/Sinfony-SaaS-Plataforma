@@ -1,3 +1,4 @@
+// src/services/feedbackService.ts
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { getUsersByIds } from './userService';
@@ -12,7 +13,7 @@ export interface FeedbackData {
   comment?: string;
 }
 
-// Interface para os dados de feedback enriquecidos que serão exibidos
+// ✅ A palavra "export" aqui é a garantia de que o erro não está no código.
 export interface EnrichedFeedback extends FeedbackData {
   id: string;
   userName: string;

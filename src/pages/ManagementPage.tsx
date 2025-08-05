@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUsersByOrganization, updateUserRole, updateUserStatus } from '../services/userService';
 import type { UserProfile } from '../types';
-import { Users, Trash2, Edit, Crown } from 'lucide-react'; // Ícone de Bell removido
+import { Users, Trash2, Edit, Crown } from 'lucide-react';
 import EditUserModal from '../components/EditUserModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import DeactivateConfirmationModal from '../components/DeactivateConfirmationModal';
